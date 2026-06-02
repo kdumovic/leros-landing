@@ -791,6 +791,7 @@
       @meetmeinleros
     </a>
   </div>
+  <button id="devToggle" type="button" aria-label="Toggle edit mode" title="Edit mode"></button>
 </footer>
 
 <script>
@@ -879,9 +880,13 @@
     document.getElementById('confirm').classList.add('show');
   });
 </script>
-<!-- DRAGDROP TEMP START (remove this whole block for the final version) -->
+<!-- EDIT-MODE TOOLING (drag-drop + export) — OFF by default; toggled via the footer dot or #edit -->
 <style id="ddTempStyle">
-  #ddBar{position:fixed;bottom:14px;right:14px;z-index:99999;display:flex;gap:8px;align-items:center}
+  #ddBar{position:fixed;bottom:14px;right:14px;z-index:99999;display:none;gap:8px;align-items:center}
+  body.dd-active #ddBar{display:flex}
+  #devToggle{display:block;width:9px;height:9px;margin:20px auto 0;padding:0;border:0;border-radius:50%;background:rgba(248,250,252,.16);cursor:pointer;transition:background .25s,box-shadow .25s,opacity .25s;opacity:.5}
+  #devToggle:hover{opacity:1;background:rgba(248,250,252,.45)}
+  body.dd-active #devToggle{background:var(--blue);opacity:1;box-shadow:0 0 0 4px rgba(11,57,240,.25)}
   #ddBar .hint{font:600 11px/1.2 system-ui,sans-serif;color:#fff;background:rgba(13,94,175,.92);padding:6px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
   #ddExportBtn{font:700 12px/1 system-ui,sans-serif;letter-spacing:.03em;background:#0d5eaf;color:#fff;border:0;border-radius:999px;padding:10px 15px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25)}
   #ddExportBtn:hover{background:#0b4f93}
@@ -916,6 +921,9 @@
 <script>
 (function(){
   var DROPPED = {};                       // slot -> filename
+  var dev=false;
+  function persist(v){ try{ if(v){localStorage.setItem('mil_dev','1');}else{localStorage.removeItem('mil_dev');} }catch(_){} }
+  function setDev(v){ dev=!!v; document.body.classList.toggle('dd-active',dev); if(!dev){ var pp=document.getElementById('ddPanel'); if(pp){pp.hidden=true;} if(typeof hi==='function'){hi(null);} } var tg=document.getElementById('devToggle'); if(tg){tg.setAttribute('aria-pressed',dev?'true':'false');} persist(dev); }
   // hit-test the whole stack at the cursor so tiles hidden behind overlays
   // (hero veil, postcard card) are still reachable
   function pickTarget(x,y){
@@ -960,13 +968,15 @@
   function hi(t){ if(t!==lastOver){ if(lastOver) lastOver.classList.remove('dd-over'); if(t) t.classList.add('dd-over'); lastOver=t; } }
   ['dragenter','dragover'].forEach(function(ev){
     document.addEventListener(ev, function(e){
+      if(!dev) return;
       if(!e.dataTransfer) return;
       e.preventDefault();                       // allow a drop anywhere on the page
       hi(pickTarget(e.clientX, e.clientY));
     });
   });
-  document.addEventListener('dragleave', function(e){ if(e.clientX===0 && e.clientY===0) hi(null); });
+  document.addEventListener('dragleave', function(e){ if(!dev) return; if(e.clientX===0 && e.clientY===0) hi(null); });
   document.addEventListener('drop', function(e){
+    if(!dev) return;
     e.preventDefault();
     var t=resolveTarget(pickTarget(e.clientX, e.clientY)); hi(null);
     if(!t) return;
@@ -1002,6 +1012,15 @@
     document.getElementById('ddCopyNote').textContent='Copied \u2713';
   });
   document.getElementById('ddClose').addEventListener('click', function(){ document.getElementById('ddPanel').hidden=true; });
+
+  // Edit mode is OFF by default (the site is live). Turn it on with the discreet footer dot,
+  // or by loading the page with #edit in the URL. State is remembered on this device.
+  var initOn=false;
+  try{ initOn = localStorage.getItem('mil_dev')==='1'; }catch(_){}
+  if(location.hash && location.hash.toLowerCase().indexOf('edit')>=0) initOn=true;
+  setDev(initOn);
+  var _tg=document.getElementById('devToggle');
+  if(_tg) _tg.addEventListener('click', function(){ setDev(!dev); });
 })();
 </script>
 <!-- DRAGDROP TEMP END -->
