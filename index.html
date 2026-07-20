@@ -303,6 +303,15 @@
   .pcard .sub{font-size:.92rem;color:rgba(248,250,252,.72)}
   .price-foot{margin-top:20px;font-size:.86rem;color:rgba(248,250,252,.55)}
 
+  /* WHY */
+  .why{background:var(--bg);padding:clamp(46px,6.5vw,90px) 0}
+  .why .wrap{max-width:1080px}
+  .why-grid{display:grid;grid-template-columns:1.65fr .85fr;gap:52px;align-items:center}
+  .why .eyebrow{display:block;color:var(--clay);margin-bottom:12px}
+  .why h2{font-size:clamp(1.9rem,3.4vw,2.7rem);line-height:1.05}
+  .why p{font-size:1rem;line-height:1.5;color:var(--ink-soft);margin-top:13px}
+  .why .why-vision{font-family:var(--display);font-size:clamp(1.2rem,2.1vw,1.55rem);line-height:1.28;color:var(--ink);margin:18px 0;padding-left:18px;border-left:3px solid var(--gold)}
+
   /* RSVP */
   .rsvp{background:radial-gradient(120% 90% at 80% 8%, rgba(70,160,225,.30), transparent 55%),linear-gradient(135deg,#1f6fa8 0%,#15528b 48%,#0f2742 100%);color:var(--paper);position:relative;overflow:hidden}
   .rsvp h2{color:var(--paper)}
@@ -328,7 +337,7 @@
   .check input{width:18px;height:18px;margin-top:3px;accent-color:var(--blue);flex:none}
   button.submit{font-family:var(--body);font-weight:600;letter-spacing:.03em;font-size:1.02rem;background:#fff;color:var(--blue-deep);border:0;padding:16px;border-radius:3px;cursor:pointer;transition:.3s;margin-top:4px}
   button.submit:hover{background:var(--blue);color:#fff}
-  .form-note{font-size:.8rem;color:rgba(248,250,252,.72)}
+  .form-note{font-size:.8rem;color:rgba(248,250,252,.72);text-align:center}
   .confirm{display:none;padding:26px;border:1px solid rgba(248,250,252,.5);border-radius:4px;background:rgba(248,250,252,.1)}
   .confirm.show{display:block}
   .confirm h3{color:#fff;font-family:var(--script);font-size:2.6rem;line-height:1;margin-bottom:6px}
@@ -337,7 +346,7 @@
   footer{background:var(--ink);color:rgba(248,250,252,.7);padding:60px 0 40px;text-align:center}
   /* hosts polaroid in the "get there" whitespace */
   .getting .wrap{position:relative}
-  .host-polaroid{position:absolute;right:6%;top:-66px;width:clamp(218px,21vw,300px);background:#fbfbf8;padding:16px 16px 0;border-radius:2px;box-shadow:0 22px 48px rgba(15,39,66,.22);transform:rotate(0deg);transform-origin:50% 50%;transition:transform .5s cubic-bezier(.2,.85,.25,1),box-shadow .5s;z-index:4;text-align:center}
+  .host-polaroid{position:relative;width:clamp(230px,26vw,320px);margin:0 auto;background:#fbfbf8;padding:16px 16px 0;border-radius:2px;box-shadow:0 22px 48px rgba(15,39,66,.22);transform:rotate(1.6deg);transform-origin:50% 50%;transition:transform .5s cubic-bezier(.2,.85,.25,1),box-shadow .5s;z-index:1;text-align:center}
   .host-polaroid:hover{transform:translateY(-5px) scale(1.03);box-shadow:0 32px 64px rgba(15,39,66,.3)}
   .host-polaroid::before{content:"";position:absolute;top:-14px;left:50%;width:96px;height:28px;transform:translateX(-50%) rotate(-2.5deg);background:rgba(216,194,156,.5);box-shadow:0 1px 3px rgba(0,0,0,.08);z-index:2}
   .host-polaroid .hp-photo{position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;border-radius:1px}
@@ -369,7 +378,7 @@
     .stay-grid,.routes,.who-points{grid-template-columns:1fr}
     .dish-grid{grid-template-columns:repeat(3,1fr)}
     .exp-cols{columns:1}
-    .price-top,.rsvp-grid,.who-grid{grid-template-columns:1fr;gap:34px}
+    .price-top,.rsvp-grid,.who-grid,.why-grid{grid-template-columns:1fr;gap:34px}
     .incl-list{columns:1}
     .two{grid-template-columns:1fr}
   }
@@ -713,14 +722,30 @@
       <p>Tell us your home airport and we'll personally map out the
       exact flights and ferries for you — and make it as easy as possible. Here are the main ways in:</p>
     </div>
-    <div class="host-polaroid">
-      <div class="hp-photo ph dd-filled" data-slot="hosts-kyle-francesca-sergio"><img class="dd-img" src="images/kyle-sergio-francesca.png" alt="Your hosts: Kyle, Francesca and Sergio"></div>
-      <div class="hp-cap">your hosts: kyle, sergio &amp; francesca</div>
-    </div>
     <div class="routes">
       <div class="route reveal"><span class="tag">By air</span><h3>Fly via Athens</h3><p>Into Athens, then a short domestic hop to Leros (LRS) with Olympic Air or Sky Express. Book early — the small planes fill up.</p><span class="time">Athens → Leros · ~50 min</span></div>
       <div class="route reveal"><span class="tag">Island-hopper</span><h3>Ferry via Kos or Rhodes</h3><p>Fly to Kos (KOS) or Rhodes (RHO), then hop on a quick ferry to Leros. Easy to add a few extra Dodecanese days to either end of the trip.</p><span class="time">Kos → Leros · ~1.5–2.5 hrs</span></div>
       <div class="route reveal"><span class="tag">Scenic</span><h3>The overnight ferry</h3><p>From Athens (Piraeus) straight to Leros — book a cabin and wake up in the Aegean. A few sailings a week.</p><span class="time">Piraeus → Leros · ~9–10 hrs</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY WE'RE DOING THIS -->
+<section class="why" id="why">
+  <div class="wrap">
+    <div class="why-grid reveal">
+      <div class="why-text">
+        <span class="eyebrow">Why we're doing this</span>
+        <h2>We design experiences for brands. This one's for you.</h2>
+        <p>Francesca and Kyle run an experience-design agency helping brands create unforgettable moments for their customers. Sergio is a top food-blogger and influencer in Europe, and plans high-end trips for a living. We've never done something like this together, for our friends or for anyone. This is the first, and it's for the people we love. It's for you to live like we live.</p>
+        <p>It's also an experiment. Francesca's island has been in her family for generations. Once you visit you'll understand why there's nowhere else like it. It's not a place you'd find on your own, it's inaccessible, it's difficult to reach. It's utterly devoid of tourists (which is part of why we love it!) but this makes it intimidating to plan a trip around. So instead we do all the planning. You just show up.</p>
+        <p class="why-vision">Last year, four of us. This year, twelve. Someday — fifty, a hundred. A yearly gathering of friends, maybe even a festival, in a beautiful corner of the world only a lucky few have discovered.</p>
+        <p>Leros is our blank canvas, and this trip is an experiment in what we can make it become. Join us this year and shape what comes next. That's our dream.</p>
+      </div>
+      <div class="host-polaroid">
+        <div class="hp-photo ph dd-filled" data-slot="hosts-kyle-francesca-sergio"><img class="dd-img" src="images/kyle-sergio-francesca.png" alt="Your hosts: Kyle, Francesca and Sergio"></div>
+        <div class="hp-cap">your hosts: kyle, sergio &amp; francesca</div>
+      </div>
     </div>
   </div>
 </section>
@@ -739,7 +764,7 @@
     <div class="rsvp-intro reveal">
       <h2>Tell us you're in.</h2>
       <p>No payment yet — just leave your details so we can hold your place and send the next steps.
-      We're keeping the group small (think 15–20), so the sooner we hear from you, the better.</p>
+      We're keeping the group small (think 10–15), so the sooner we hear from you, the better.</p>
     </div>
     <div class="rsvp-form-wrap reveal">
       <form id="rsvpForm">
@@ -750,9 +775,9 @@
         <div class="field">
           <label for="room">Room &amp; budget</label>
           <select id="room" name="room">
-            <option value="Couples sharing a room — $2,999 / person">Couples sharing a room — $2,999 / person</option>
-            <option value="Friends sharing a double — $2,999 / person">Friends sharing a double — $2,999 / person</option>
-            <option value="Solo, private room — $3,599">Solo, private room — $3,599</option>
+            <option value="Shared room with friends">Shared room with friends — $2500 estimate</option>
+            <option value="Shared room couple">Shared room (couple) — $2500 estimate</option>
+            <option value="Private room">Private room — $3200 estimate</option>
           </select>
         </div>
         <div class="field">
@@ -763,10 +788,10 @@
             <option value="Airbnb / house (Pleiades & friends)">Airbnb / house (Pleiades &amp; friends)</option>
           </select>
         </div>
-        <label class="check"><input type="checkbox" id="bunk" name="bunk" /> Happy to bunk with other friends to keep costs down.</label>
+        <!-- <label class="check"><input type="checkbox" id="bunk" name="bunk" /> Happy to bunk with other friends to keep costs down.</label> -->
         <div class="field"><label for="note">Anything else? (optional)</label><textarea id="note" name="note" rows="3" placeholder="Bringing a +1? Questions? Tell us."></textarea></div>
         <button class="submit" type="submit">Secure your spot →</button>
-        <p class="form-note">By replying you're holding a place, not committing to payment. We'll be in touch.</p>
+        <p class="form-note">By replying you're holding a place, not committing to payment.</p>
       </form>
       <div class="confirm" id="confirm">
         <h3>You're in</h3>
@@ -778,11 +803,11 @@
     <figure class="snap" style="left:1%;top:72%;--r:-4deg;--tape:-4deg"><div class="ph v1 dd-filled" data-slot="polaroid-3"><img class="dd-img" src="images/IMG_7461.JPG"></div><figcaption>golden hour</figcaption></figure>
     <figure class="snap" style="left:6%;top:52%;--r:5deg;--tape:5deg"><div class="ph v2 dd-filled" data-slot="polaroid-2"><img class="dd-img" src="images/IMG_8167.JPG"></div><figcaption>boat day</figcaption></figure>
     <figure class="snap" style="left:19%;top:62%;--r:6deg;--tape:4deg"><div class="ph v2 dd-filled" data-slot="polaroid-5"><img class="dd-img" src="images/IMG_5855.JPG"></div><figcaption>slow mornings</figcaption></figure>
-    <figure class="snap" style="left:31%;top:74%;--r:-5deg;--tape:-6deg"><div class="ph v3 dd-filled" data-slot="polaroid-7"><img class="dd-img" src="images/IMG_6050.JPG"></div><figcaption>last dance</figcaption></figure>
+    <figure class="snap" style="left:13%;top:74%;--r:-5deg;--tape:-6deg"><div class="ph v3 dd-filled" data-slot="polaroid-7"><img class="dd-img" src="images/IMG_6050.JPG"></div><figcaption>last dance</figcaption></figure>
     <figure class="snap" style="right:19%;top:62%;--r:-6deg;--tape:-5deg"><div class="ph v3 dd-filled" data-slot="polaroid-12"><img class="dd-img" src="images/IMG_7757.JPG"></div><figcaption>cliff jumps</figcaption></figure>
     <figure class="snap" style="right:6%;top:52%;--r:-5deg;--tape:-6deg"><div class="ph v1 dd-filled" data-slot="polaroid-9"><img class="dd-img" src="images/IMG_3611.JPG"></div><figcaption>one more swim</figcaption></figure>
     <figure class="snap" style="right:1%;top:72%;--r:4deg;--tape:5deg"><div class="ph v2 dd-filled" data-slot="polaroid-10"><img class="dd-img" src="images/IMG_7187.JPG"></div><figcaption>see you soon</figcaption></figure>
-    <figure class="snap" style="right:31%;top:74%;--r:4deg;--tape:4deg"><div class="ph v1 dd-filled" data-slot="polaroid-14"><img class="dd-img" src="images/IMG_6555.JPG"></div><figcaption>yiá mas</figcaption></figure>
+    <figure class="snap" style="right:13%;top:74%;--r:4deg;--tape:4deg"><div class="ph v1 dd-filled" data-slot="polaroid-14"><img class="dd-img" src="images/IMG_6555.JPG"></div><figcaption>yiá mas</figcaption></figure>
   </div>
 </section>
 
