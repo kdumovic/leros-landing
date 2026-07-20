@@ -282,9 +282,15 @@
   .price{background:var(--ink);color:var(--paper)}
   .price h2,.price h3{color:var(--paper)}
   .price .eyebrow{color:var(--paper)}
-  .price-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;margin-top:6px}
-  .incl-list{list-style:none;margin-top:4px}
-  .incl-list li{padding:14px 0;border-bottom:1px solid rgba(248,250,252,.16);display:flex;gap:14px;align-items:flex-start;color:rgba(248,250,252,.86)}
+  .price .section-head{max-width:720px}
+  .price .section-head p{margin-top:16px;font-size:1.06rem;color:rgba(248,250,252,.74);max-width:62ch}
+  .price .section-head p strong{color:var(--paper);font-weight:600}
+  .price-top{display:grid;grid-template-columns:1.28fr 1fr;gap:52px;align-items:start;margin-top:8px}
+  .price-top .section-head{margin-bottom:0;max-width:none}
+  .price-aside{display:grid;gap:14px}
+  .price-bottom{margin-top:38px;border-top:1px solid rgba(248,250,252,.16);padding-top:32px}
+  .incl-list{list-style:none;columns:2;column-gap:48px;margin-top:10px}
+  .incl-list li{padding:11px 0;border-bottom:1px solid rgba(248,250,252,.16);display:flex;gap:14px;align-items:flex-start;color:rgba(248,250,252,.86);break-inside:avoid}
   .incl-list li::before{content:"✦";color:var(--gold);font-size:.85rem;margin-top:3px}
   .excl{margin-top:22px;font-size:.92rem;color:rgba(248,250,252,.6)}
   .excl strong{color:var(--paper);font-weight:600}
@@ -363,7 +369,8 @@
     .stay-grid,.routes,.who-points{grid-template-columns:1fr}
     .dish-grid{grid-template-columns:repeat(3,1fr)}
     .exp-cols{columns:1}
-    .price-grid,.rsvp-grid,.who-grid{grid-template-columns:1fr;gap:34px}
+    .price-top,.rsvp-grid,.who-grid{grid-template-columns:1fr;gap:34px}
+    .incl-list{columns:1}
     .two{grid-template-columns:1fr}
   }
 
@@ -663,36 +670,36 @@
 <!-- PRICING -->
 <section class="price" id="price">
   <div class="wrap">
-    <div class="section-head reveal">
-      <span class="eyebrow">The cost</span>
-      <h2>One number, nearly everything.</h2>
-    </div>
-    <div class="price-grid">
-      <div class="reveal">
-        <h3 style="margin-bottom:6px">What's covered</h3>
-        <ul class="incl-list">
-          <li>Seven nights' accommodation in Alinda, steps from the sea</li>
-          <li>All meals — taverna feasts, family dinners at the villa, snacks and drinks on hand, plus a private chef.</li>
-          <li>Drinks (spritzes, local wines &amp; beers, ouzo) throughout the week.</li>
-          <li>Every activity &amp; excursion: boat days, Patmos, watersports, classes, museums</li>
-          <li>All transport on the island — transfers, boats, the lot</li>
-          <li>Three hosts who've planned every detail so you don't have to</li>
-        </ul>
-        <p class="excl"><strong>The only thing not included is getting to Leros.</strong> You book your own flights and ferries — and we'll walk you through exactly how. More on that below.</p>
+    <div class="price-top">
+      <div class="section-head reveal">
+        <span class="eyebrow">The cost</span>
+        <h2>Everything handled, charged at cost.</h2>
+        <p>Honest version: we've never run a trip like this before — it's an experiment, and we'd love for you to be part of it. So we've kept it simple. We organize and pay for everything up front, so you never reach for your credit card on the island. You settle up with us <strong>at cost</strong> — exactly what the week costs to put on — <strong>plus a flat 20%</strong> for the three of us planning and running every last detail. Nothing hidden, nothing padded beyond that.</p>
       </div>
-      <div class="cards reveal">
+      <div class="price-aside reveal">
         <div class="pcard feature">
-          <span class="label">Sharing a room · per person</span>
-          <div class="amt">$2,999<small> / person</small></div>
-          <p class="sub">For couples or friends sharing a double — the best value, and honestly the most fun way to do it.</p>
+          <span class="label">Our estimate · per person</span>
+          <div class="amt">$2,500<small> &amp; up</small></div>
+          <p class="sub">Our honest floor for a shared room — the best value, and the most fun way to do it. Your own private room runs a little more.</p>
         </div>
         <div class="pcard">
-          <span class="label">Solo · private room</span>
-          <div class="amt">$3,599<small> / person</small></div>
-          <p class="sub">Your own room, your own space.</p>
+          <span class="label">What moves the number</span>
+          <p class="sub">Two things: whether you share a room or want your own, and how many activities we plan for the group (and how far we roam). The estimate will firm up as guests confirm — always at cost, plus that same flat 20%.</p>
         </div>
-        <p class="price-foot">A deposit will be requested once the final group is locked in, before we book accommodation. <strong>Spots are limited.</strong></p>
       </div>
+    </div>
+    <div class="price-bottom reveal">
+      <h3 style="margin-bottom:6px">What's covered</h3>
+      <ul class="incl-list">
+        <li>Seven nights' accommodation in Alinda, steps from the sea</li>
+        <li>All meals — taverna feasts, family dinners at the villa, snacks and drinks on hand, plus a private chef.</li>
+        <li>Drinks (spritzes, local wines &amp; beers, ouzo) throughout the week.</li>
+        <li>Every activity &amp; excursion: boat days, Patmos, watersports, classes, museums</li>
+        <li>All transport on the island — transfers, boats, the lot</li>
+        <li>Three hosts who've planned every detail so you don't have to</li>
+      </ul>
+      <p class="excl"><strong>The only thing not included is getting to Leros.</strong> You book your own flights and ferries — and we'll walk you through exactly how. More on that below.</p>
+      <p class="price-foot">Nothing's due yet. Once the group is set, we'll ask for a deposit before booking accommodation — and we'll show you the real, itemized numbers before you commit to anything. Fair and open, start to finish. <strong>Spots are limited.</strong></p>
     </div>
   </div>
 </section>
