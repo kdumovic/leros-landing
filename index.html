@@ -945,13 +945,14 @@
   document.getElementById('rsvpForm').addEventListener('submit', function(ev){
     ev.preventDefault();
     var get = function(id){ return (document.getElementById(id).value || '').trim(); };
+    var bunkEl=document.getElementById('bunk');
     var name=get('name'), email=get('email'), room=document.getElementById('room').value,
-        style=document.getElementById('style').value, bunk=document.getElementById('bunk').checked?'Yes':'No', note=get('note');
+        style=document.getElementById('style').value, bunk=bunkEl?(bunkEl.checked?'Yes':'No'):'', note=get('note');
     if(FORMSPREE_ENDPOINT){
       fetch(FORMSPREE_ENDPOINT, { method:'POST', headers:{'Accept':'application/json'}, body:new FormData(ev.target) });
     } else {
       var subject = encodeURIComponent('Meet Me in Leros — count me in: ' + name);
-      var body = encodeURIComponent('Name: '+name+'\nEmail: '+email+'\nRoom & budget: '+room+'\nPrefers: '+style+'\nOpen to bunking: '+bunk+'\nNote: '+(note||'—')+'\n\nHold my spot for Meet Me in Leros, Sept 6\u201313, 2026.');
+      var body = encodeURIComponent('Name: '+name+'\nEmail: '+email+'\nRoom & budget: '+room+'\nPrefers: '+style+(bunk?'\nOpen to bunking: '+bunk:'')+'\nNote: '+(note||'—')+'\n\nHold my spot for Meet Me in Leros, Sept 6\u201313, 2026.');
       window.location.href = 'mailto:' + HOSTS_EMAIL + '?subject=' + subject + '&body=' + body;
     }
     document.getElementById('rsvpForm').style.display = 'none';
