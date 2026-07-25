@@ -346,7 +346,7 @@
   .modal-card{position:relative;z-index:1;width:100%;max-width:460px;text-align:center;background:linear-gradient(180deg,#fcfdff,#f3f7fb);border:1px solid rgba(255,255,255,.7);border-radius:16px;padding:48px 40px 40px;box-shadow:0 40px 90px -30px rgba(8,22,42,.65);animation:modalPop .38s cubic-bezier(.2,.85,.25,1)}
   .modal-x{position:absolute;top:14px;right:16px;width:34px;height:34px;border:0;background:none;font-size:1.7rem;line-height:1;color:var(--ink-soft);cursor:pointer;border-radius:50%;transition:background .2s,color .2s}
   .modal-x:hover{background:rgba(15,39,66,.07);color:var(--ink)}
-  .modal-star{display:block;font-size:1.1rem;color:var(--gold);letter-spacing:.4em;margin-bottom:10px}
+  .modal-eye{display:block;height:46px;width:auto;margin:0 auto 14px}
   .modal-card h3{font-family:var(--script);font-size:clamp(3.2rem,11vw,4.2rem);line-height:.9;color:var(--blue);margin:0}
   .modal-card p{font-size:1.05rem;line-height:1.55;color:var(--ink-soft);margin:14px auto 0;max-width:34ch}
   .modal-done{margin-top:28px;font-family:var(--body);font-weight:600;font-size:1rem;letter-spacing:.02em;background:var(--blue);color:#fff;border:0;border-radius:999px;padding:13px 30px;cursor:pointer;transition:background .25s}
@@ -874,9 +874,9 @@
   <div class="modal-backdrop" data-close></div>
   <div class="modal-card" role="document">
     <button class="modal-x" type="button" aria-label="Close" data-close>&times;</button>
-    <span class="modal-star" aria-hidden="true">✦</span>
+    <img class="modal-eye" id="modalEye" aria-hidden="true" alt="" />
     <h3 id="rsvpModalTitle">You're in!</h3>
-    <p>We've got your details and we'll follow up soon with next steps. Get excited for the trip of a lifetime!</p>
+    <p>We've got your details and we'll follow up soon with next steps. See you in Leros!</p>
     <button class="modal-done" type="button" data-close>Back to the site</button>
   </div>
 </div>
@@ -932,6 +932,8 @@
   window.addEventListener('scroll', function(){ nav.classList.toggle('scrolled', window.scrollY > 60); });
   var brandLink = document.querySelector('#nav .brand');
   if(brandLink){ brandLink.addEventListener('click', function(e){ e.preventDefault(); window.scrollTo({top:0, behavior:'smooth'}); }); }
+  var navEye = document.querySelector('#nav .brand-eye'), modalEye = document.getElementById('modalEye');
+  if(navEye && modalEye){ modalEye.src = navEye.src; }
   var io = new IntersectionObserver(function(entries){
     entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
   }, {threshold:0.12});
