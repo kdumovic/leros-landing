@@ -338,6 +338,8 @@
   button.submit{width:100%;white-space:nowrap;font-family:var(--body);font-weight:600;letter-spacing:.03em;font-size:1.02rem;background:#fff;color:var(--blue-deep);border:0;padding:16px;border-radius:3px;cursor:pointer;transition:.3s;margin-top:4px}
   button.submit:hover{background:var(--blue);color:#fff}
   .form-note{font-size:.8rem;color:rgba(248,250,252,.72);text-align:center}
+  .form-error{display:none;font-size:.9rem;color:#ffd7cf;text-align:center;margin-top:4px}
+  .form-error a{color:#fff;text-decoration:underline}
   .confirm{display:none;padding:26px;border:1px solid rgba(248,250,252,.5);border-radius:4px;background:rgba(248,250,252,.1)}
   .confirm.show{display:block}
   .confirm h3{color:#fff;font-family:var(--script);font-size:2.6rem;line-height:1;margin-bottom:6px}
@@ -815,12 +817,14 @@
         </div>
         <!-- <label class="check"><input type="checkbox" id="bunk" name="bunk" /> Happy to bunk with other friends to keep costs down.</label> -->
         <div class="field"><label for="note">Anything else? (optional)</label><textarea id="note" name="note" rows="3" placeholder="Bringing a +1? Questions? Tell us."></textarea></div>
+        <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" />
         <button class="submit" type="submit">Secure your spot →</button>
+        <p class="form-error" id="formError">Hmm, that didn't send. Please try again, or email us directly at <a href="mailto:hello@meetmeinleros.com">hello@meetmeinleros.com</a>.</p>
         <p class="form-note">By replying you're holding a place, not committing to payment.</p>
       </form>
       <div class="confirm" id="confirm">
         <h3>You're in</h3>
-        <p>We've got your details and we'll follow up shortly with next steps. If your email client opened, hit send to reach us directly.</p>
+        <p>We've got your details and we'll follow up shortly with next steps.</p>
       </div>
     </div>
   </div>
@@ -859,7 +863,7 @@
 
 <script>
   var HOSTS_EMAIL = "hello@meetmeinleros.com";   // <-- change to your real email
-  var FORMSPREE_ENDPOINT = "";                    // optional: paste a Formspree URL to collect entries in a dashboard
+  var FORM_ENDPOINT = "https://formsubmit.co/ajax/hello@meetmeinleros.com";   // FormSubmit AJAX endpoint — submissions email this inbox (falls back to mailto if emptied)
 
   /* photo arrays — fill these with your image URLs/filenames and everything renders automatically */
   var HERO_PHOTOS = ["images/b2c82cc4-0fa0-4042-ad39-b93f7d934902.jpg","images/IMG_9823.JPG","images/IMG_0906.JPG","images/IMG_1192.JPG","images/IMG_0779.JPG","images/IMG_7207.JPG","images/IMG_6527.JPG","images/IMG_0886.JPG","images/FullSizeRender.JPG","images/IMG_1779.JPG","images/IMG_6572.JPG","images/IMG_2471.JPG"];     // moving hero wall
@@ -944,19 +948,41 @@
   /* form */
   document.getElementById('rsvpForm').addEventListener('submit', function(ev){
     ev.preventDefault();
-    var get = function(id){ return (document.getElementById(id).value || '').trim(); };
+    var form = ev.target;
+    var get = function(id){ var el=document.getElementById(id); return el ? (el.value || '').trim() : ''; };
     var bunkEl=document.getElementById('bunk');
-    var name=get('name'), email=get('email'), room=document.getElementById('room').value,
-        style=document.getElementById('style').value, bunk=bunkEl?(bunkEl.checked?'Yes':'No'):'', note=get('note');
-    if(FORMSPREE_ENDPOINT){
-      fetch(FORMSPREE_ENDPOINT, { method:'POST', headers:{'Accept':'application/json'}, body:new FormData(ev.target) });
+    var name=get('name'), email=get('email'), room=get('room'),
+        style=get('style'), bunk=bunkEl?(bunkEl.checked?'Yes':'No'):'', note=get('note');
+
+    function showConfirm(){
+      form.style.display = 'none';
+      document.getElementById('confirm').classList.add('show');
+    }
+
+    if(FORM_ENDPOINT){
+      /* submit to FormSubmit; only confirm on success, surface errors otherwise */
+      var btn = form.querySelector('button[type="submit"]');
+      var errEl = document.getElementById('formError');
+      var label = btn ? btn.textContent : '';
+      if(errEl){ errEl.style.display = 'none'; }
+      if(btn){ btn.disabled = true; btn.textContent = 'Sending…'; }
+      var data = new FormData(form);
+      data.append('_subject', 'Meet Me in Leros — new RSVP: ' + name);
+      data.append('_replyto', email);       // reply goes straight to the guest
+      data.append('_template', 'table');     // formatted notification email
+      data.append('_captcha', 'false');      // no captcha redirect on AJAX submits
+      fetch(FORM_ENDPOINT, { method:'POST', headers:{'Accept':'application/json'}, body:data })
+        .then(function(res){ if(res.ok){ showConfirm(); } else { throw new Error('status ' + res.status); } })
+        .catch(function(){
+          if(btn){ btn.disabled = false; btn.textContent = label; }
+          if(errEl){ errEl.style.display = 'block'; }
+        });
     } else {
       var subject = encodeURIComponent('Meet Me in Leros — count me in: ' + name);
       var body = encodeURIComponent('Name: '+name+'\nEmail: '+email+'\nRoom & budget: '+room+'\nPrefers: '+style+(bunk?'\nOpen to bunking: '+bunk:'')+'\nNote: '+(note||'—')+'\n\nHold my spot for Meet Me in Leros, Sept 6\u201313, 2026.');
       window.location.href = 'mailto:' + HOSTS_EMAIL + '?subject=' + subject + '&body=' + body;
+      showConfirm();
     }
-    document.getElementById('rsvpForm').style.display = 'none';
-    document.getElementById('confirm').classList.add('show');
   });
 </script>
 <!-- EDIT-MODE TOOLING (drag-drop + export) — OFF by default; toggled via the footer dot or #edit -->
