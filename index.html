@@ -18,7 +18,7 @@
 <meta name="twitter:image" content="https://meetmeinleros.com/images/social-share.jpg" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..600&family=Hanken+Grotesk:wght@300;400;500;600;700&family=Allura&family=Caveat:wght@500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..600&family=Hanken+Grotesk:wght@300;400;500;600;700&family=Allura&family=Caveat:wght@500;600&family=Patrick+Hand&display=swap" rel="stylesheet" />
 <style>
   :root{
     --ink:#0f2742;
@@ -40,6 +40,7 @@
     --body:"Hanken Grotesk",-apple-system,sans-serif;
     --script:"Allura",cursive;
     --hand:"Caveat",cursive;
+    --marker:"Patrick Hand","Caveat",cursive;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
@@ -365,7 +366,7 @@
   .host-polaroid::before{content:"";position:absolute;top:-14px;left:50%;width:96px;height:28px;transform:translateX(-50%) rotate(-2.5deg);background:rgba(216,194,156,.5);box-shadow:0 1px 3px rgba(0,0,0,.08);z-index:2}
   .host-polaroid .hp-photo{position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;border-radius:1px}
   .host-polaroid .hp-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 66%}
-  .host-polaroid .hp-cap{font-family:var(--hand);color:var(--ink);font-size:1.32rem;line-height:1.1;font-weight:400;padding:12px 6px 16px}
+  .host-polaroid .hp-cap{font-family:var(--marker);color:var(--ink);font-size:1.18rem;line-height:1.15;font-weight:400;padding:12px 6px 16px}
   @media (max-width:760px){.host-polaroid{position:static;width:210px;margin:14px auto 0;transform:none}.host-polaroid:hover{transform:scale(1.02)}.getting .section-head{margin-bottom:22px}}
 
   footer .brand{justify-content:center;color:var(--paper);font-size:1.5rem;margin-bottom:12px}
@@ -426,10 +427,10 @@
   /* closing polaroids */
   .snap{background:#fff;padding:11px 11px 40px;border-radius:2px;box-shadow:0 12px 30px rgba(20,30,25,.18);width:208px;margin:14px -10px;position:relative;transform:rotate(var(--r,0)) translateY(var(--y,0));transition:transform .4s cubic-bezier(.2,.8,.2,1),box-shadow .4s}
   .snap .ph{aspect-ratio:1;border-radius:1px}
-  .snap figcaption{position:absolute;left:10px;right:10px;bottom:11px;text-align:center;font-family:var(--hand);font-size:1.32rem;line-height:1;color:var(--ink)}
+  .snap figcaption{position:absolute;left:10px;right:10px;bottom:11px;text-align:center;font-family:var(--marker);font-size:1.16rem;line-height:1.05;color:var(--ink)}
   .snap::before{content:"";position:absolute;top:-10px;left:50%;width:62px;height:20px;transform:translateX(-50%) rotate(var(--tape,-4deg));background:rgba(216,194,156,.42);box-shadow:0 1px 2px rgba(0,0,0,.06)}
   .snap:hover{transform:rotate(0) translateY(0) scale(1.05);box-shadow:0 22px 48px rgba(20,30,25,.28);z-index:6}
-  @media(max-width:680px){.snap{width:150px;margin:10px -6px;padding:8px 8px 32px}.snap figcaption{font-size:1.06rem}}
+  @media(max-width:680px){.snap{width:150px;margin:10px -6px;padding:8px 8px 32px}.snap figcaption{font-size:.96rem}}
   .rsvp-snaps{position:absolute;inset:0;z-index:1;pointer-events:none}
   .rsvp-snaps .snap{position:absolute;width:160px;margin:0;pointer-events:auto;box-shadow:0 16px 36px rgba(0,0,0,.28)}
   .rsvp .rsvp-center{position:relative;z-index:2}
