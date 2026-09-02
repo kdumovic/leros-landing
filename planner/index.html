@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="robots" content="noindex" />
+<title>Leros Planner — Itinerary drag &amp; drop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..600&family=Hanken+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#0f2742; --ink-soft:#45566a; --bg:#eef1f5; --paper:#f8fafc; --white:#fff;
+    --clay:#c05f37; --sea:#0b39f0; --sea-bright:#2fa1bb; --green:#2e8f78; --gold:#d29e54; --plum:#8a7bb5;
+    --line:rgba(22,47,42,.16); --line-soft:rgba(22,47,42,.08);
+    --display:"Fraunces",Georgia,serif; --body:"Hanken Grotesk",-apple-system,system-ui,sans-serif;
+    --colw:250px; --hdr:56px; --tabs:44px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:var(--body);background:var(--bg);color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased;overflow:hidden;
+    -webkit-tap-highlight-color:transparent;display:flex;flex-direction:column;height:100dvh}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  input,textarea,select{font:inherit;color:inherit}
+
+  /* header */
+  header{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--paper);border-bottom:1px solid var(--line-soft);min-height:var(--hdr);
+    padding-top:calc(8px + env(safe-area-inset-top))}
+  .brand{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+  .brand b{font-family:var(--display);font-weight:500;font-size:1.15rem;letter-spacing:-.01em;white-space:nowrap}
+  .brand small{font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--sea);font-weight:600;white-space:nowrap}
+  .status{display:flex;align-items:center;gap:6px;font-size:.74rem;color:var(--ink-soft);margin-left:4px;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .status .dot{width:8px;height:8px;border-radius:50%;background:#b9c2cc;flex:0 0 auto}
+  .status.ok .dot{background:var(--green)} .status.busy .dot{background:var(--gold)} .status.off .dot{background:var(--clay)}
+  .spacer{flex:1}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:var(--white);font-size:.8rem;font-weight:600;white-space:nowrap}
+  .btn:hover{border-color:var(--ink)}
+  .btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .btn.ghost{background:transparent}
+  .btn:disabled{opacity:.4;cursor:default}
+  .who{font-size:.74rem;color:var(--ink-soft)} .who b{color:var(--ink);cursor:pointer;text-decoration:underline dotted}
+
+  /* day tabs */
+  .tabs{flex:0 0 auto;display:flex;gap:6px;overflow-x:auto;padding:8px 14px;scrollbar-width:none;background:var(--bg);min-height:var(--tabs)}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:0 0 auto;padding:5px 11px;border-radius:999px;border:1px solid var(--line-soft);background:var(--white);font-size:.74rem;font-weight:600;color:var(--ink-soft)}
+  .tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .tab .d{opacity:.7;font-weight:500;margin-left:4px}
+
+  /* board */
+  .board{flex:1;display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;padding:4px 14px 14px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+  .col{flex:0 0 var(--colw);display:flex;flex-direction:column;background:var(--paper);border:1px solid var(--line-soft);border-radius:16px;min-height:0;overflow:hidden}
+  .col.pool{background:#f1ede6;border-style:dashed;border-color:var(--line)}
+  .col-h{padding:12px 12px 8px;border-bottom:1px solid var(--line-soft)}
+  .col-h .eyebrow{font-size:.62rem;letter-spacing:.24em;text-transform:uppercase;font-weight:600;color:var(--sea)}
+  .col.pool .col-h .eyebrow{color:var(--clay)}
+  .col-h h2{font-family:var(--display);font-weight:500;font-size:1.2rem;line-height:1.1;letter-spacing:-.01em;margin-top:2px}
+  .col-h .cnt{font-size:.7rem;color:var(--ink-soft);margin-top:2px}
+  .slots{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:10px;min-height:0}
+  .slot{display:flex;flex-direction:column}
+  .slot-h{display:flex;align-items:center;gap:6px;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;font-weight:600;color:var(--ink-soft);padding:0 4px 4px}
+  .slot-h::after{content:"";flex:1;height:1px;background:var(--line-soft)}
+  .zone{min-height:54px;border:1.5px dashed transparent;border-radius:12px;padding:4px;display:flex;flex-direction:column;gap:6px;transition:border-color .15s,background .15s}
+  .zone:empty{border-color:var(--line)}
+  .zone:empty::before{content:"Drop here";display:block;text-align:center;font-size:.72rem;color:#9aa5b1;padding:14px 0}
+  .zone.over{border-color:var(--sea);background:rgba(11,57,240,.05)}
+  .col.pool .zone{flex:1;min-height:200px}
+  body[data-pin] .col[data-day]:not([data-day="pool"]):not(.pin-ok) .zone{opacity:.28;border-color:transparent}
+  body[data-pin] .col.pin-ok{box-shadow:0 0 0 2px var(--sea) inset}
+
+  /* cards */
+  .card{position:relative;background:var(--white);border-radius:10px;padding:8px 10px 8px 12px;border-left:4px solid var(--k,#999);box-shadow:0 1px 2px rgba(15,39,66,.08);
+    cursor:grab;user-select:none;-webkit-user-select:none;touch-action:pan-x pan-y}
+  .card:active{cursor:grabbing}
+  .card .t{font-weight:600;font-size:.86rem;line-height:1.25}
+  .card .n{font-size:.74rem;color:var(--ink-soft);margin-top:3px;line-height:1.3}
+  .card .m{display:flex;gap:6px;align-items:center;margin-top:5px;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;font-weight:600;color:var(--k,#999)}
+  .card .m .pin{color:var(--ink);background:#eef1f5;border-radius:4px;padding:1px 5px;letter-spacing:.05em}
+  .card.lg{padding:12px 12px 12px 14px;min-height:88px;background:linear-gradient(180deg,#fff,#fbfcfe)}
+  .card.lg .t{font-family:var(--display);font-weight:500;font-size:1.05rem;line-height:1.15}
+  .card.sm .n{display:none}
+  .sortable-ghost{opacity:.3}
+  .sortable-drag{transform:rotate(1.5deg);box-shadow:0 10px 24px rgba(15,39,66,.22)!important;opacity:.95}
+  .sortable-fallback{opacity:.95!important}
+
+  /* sheets */
+  .ov{position:fixed;inset:0;background:rgba(15,39,66,.45);display:none;align-items:flex-end;justify-content:center;z-index:50;padding:0}
+  .ov.open{display:flex}
+  .sheet{background:var(--paper);width:100%;max-width:560px;border-radius:18px 18px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));max-height:92dvh;overflow-y:auto;
+    box-shadow:0 -10px 40px rgba(15,39,66,.2)}
+  @media(min-width:640px){.ov{align-items:center;padding:20px}.sheet{border-radius:18px}}
+  .sheet h3{font-family:var(--display);font-weight:500;font-size:1.35rem;margin-bottom:10px}
+  .f{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+  .f label{font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;font-weight:600;color:var(--ink-soft)}
+  .f input[type=text],.f textarea,.f select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:.95rem}
+  .f textarea{min-height:64px;resize:vertical}
+  .row{display:flex;gap:10px}.row>*{flex:1}
+  .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+  .seg button{flex:1;padding:9px;font-size:.85rem;font-weight:600;color:var(--ink-soft)}
+  .seg button.on{background:var(--ink);color:#fff}
+  .chk{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:.9rem}
+  .f label.chk{text-transform:none;letter-spacing:0;font-size:.9rem;font-weight:400;color:var(--ink)}
+  .chk input{width:18px;height:18px;accent-color:var(--ink);flex:0 0 auto}
+  .chk small{color:var(--ink-soft);display:block;font-size:.75rem}
+  .acts{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+  .acts .spacer{flex:1}
+  .danger{color:var(--clay);border-color:rgba(192,95,55,.4)}
+  .vlist{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+  .v{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line-soft);border-radius:10px;background:#fff}
+  .v .vn{flex:1;min-width:0}.v .vn b{display:block;font-size:.9rem}.v .vn small{color:var(--ink-soft);font-size:.72rem}
+  .hint{font-size:.78rem;color:var(--ink-soft);margin:6px 0 12px}
+  .kinds{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .kinds button{padding:8px 4px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:.72rem;font-weight:600;border-left:4px solid var(--k)}
+  .kinds button.on{background:var(--ink);color:#fff;border-color:var(--ink);border-left-color:var(--k)}
+  .banner{display:none;align-items:center;gap:10px;margin:0 14px;padding:10px 12px;background:#fff7e8;border:1px solid rgba(210,158,84,.5);border-radius:12px;font-size:.8rem}
+  .banner.show{display:flex}
+  .banner .spacer{flex:1}
+  .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:9px 14px;border-radius:999px;font-size:.8rem;opacity:0;transition:.2s;z-index:60;pointer-events:none;white-space:nowrap}
+  .toast.show{opacity:1;transform:translateX(-50%)}
+
+  @media(max-width:640px){
+    :root{--colw:84vw}
+    .board{scroll-snap-type:x mandatory;gap:10px;padding:2px 10px 10px}
+    .col{scroll-snap-align:center}
+    header{gap:8px;padding-left:12px;padding-right:12px}
+    .brand b{font-size:1rem}
+    .hide-m{display:none}
+    .status #statusTxt{display:none}
+    .status{margin-left:0}
+    .brand{flex:1;min-width:0;overflow:hidden}
+    .brand small{display:none}
+    .brand b{font-size:1rem;overflow:hidden;text-overflow:ellipsis}
+    .spacer{display:none}
+    .btn{padding:6px 9px;font-size:.76rem}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><small>Meet me in Leros</small><b>Trip planner</b></div>
+  <div class="status" id="status"><span class="dot"></span><span id="statusTxt">Loading…</span></div>
+  <div class="spacer"></div>
+  <span class="who hide-m" id="whoWrap">I'm <b id="whoName">…</b></span>
+  <button class="btn ghost" id="undoBtn" title="Undo last change" disabled>↶<span class="hide-m"> Undo</span></button>
+  <button class="btn" id="versionsBtn">Versions</button>
+  <button class="btn" id="shareBtn">Share</button>
+  <button class="btn primary" id="addBtn">＋ Add</button>
+</header>
+
+<div class="banner" id="banner">
+  <span>📍 You're editing a new shared board. Send the link to Francesca so you're both on the same one.</span>
+  <span class="spacer"></span>
+  <button class="btn" id="bannerCopy">Copy link</button>
+  <button class="btn ghost" id="bannerClose">✕</button>
+</div>
+
+<nav class="tabs" id="tabs"></nav>
+<main class="board" id="board"></main>
+
+<!-- edit sheet -->
+<div class="ov" id="editOv"><div class="sheet">
+  <h3 id="editTitle">Edit item</h3>
+  <div class="f"><label>Title</label><input type="text" id="eTitle" placeholder="What are we doing?" /></div>
+  <div class="f"><label>Note</label><textarea id="eNote" placeholder="Details, timing, who's in…"></textarea></div>
+  <div class="row">
+    <div class="f"><label>Block size</label><div class="seg" id="eSize"><button data-v="sm">Small</button><button data-v="lg">Big block</button></div></div>
+  </div>
+  <div class="f"><label>Type</label><div class="kinds" id="eKind"></div></div>
+  <div class="f"><label>Where</label>
+    <div class="row"><select id="eDay"></select><select id="eSlot"></select></div>
+  </div>
+  <div class="f"><label class="chk"><input type="checkbox" id="ePin" /><span><b>Fixed to this day</b><small id="ePinHint">Can only happen on this day — drag is limited to its time slots.</small></span></label></div>
+  <div class="acts">
+    <button class="btn danger" id="eDelete">Delete</button>
+    <span class="spacer"></span>
+    <button class="btn ghost" id="eCancel">Cancel</button>
+    <button class="btn primary" id="eSave">Save</button>
+  </div>
+</div></div>
+
+<!-- versions sheet -->
+<div class="ov" id="verOv"><div class="sheet">
+  <h3>Versions</h3>
+  <p class="hint">Save the current layout as a named version, then keep experimenting. Loading a version replaces what's on the board (you can undo).</p>
+  <div class="vlist" id="vlist"></div>
+  <div class="f"><label>Save current board as</label><div class="row"><input type="text" id="vName" placeholder="e.g. Boat day on Tuesday" /><button class="btn primary" id="vSave" style="flex:0 0 auto">Save version</button></div></div>
+  <div class="acts">
+    <button class="btn danger" id="vReset">Reset to original itinerary</button>
+    <span class="spacer"></span>
+    <button class="btn ghost" id="vClose">Close</button>
+  </div>
+</div></div>
+
+<!-- who sheet -->
+<div class="ov" id="whoOv"><div class="sheet">
+  <h3>Who's planning?</h3>
+  <p class="hint">So the other person can see who moved what.</p>
+  <div class="acts" style="margin-bottom:12px">
+    <button class="btn primary" data-who="Kyle">Kyle</button>
+    <button class="btn primary" data-who="Francesca">Francesca</button>
+  </div>
+  <div class="f"><label>Or someone else</label><div class="row"><input type="text" id="whoOther" placeholder="Your name" /><button class="btn" id="whoOtherBtn" style="flex:0 0 auto">That's me</button></div></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script src="sortable.min.js"></script>
+<script>
+if(!window.Sortable){var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js';s.onload=function(){window.__boot&&window.__boot()};document.head.appendChild(s)}
+</script>
+<script>
+(function(){
+'use strict';
+
+/* ---------------- data ---------------- */
+const DAYS=[
+  {id:'d1',n:1,date:'Sun Sep 6', title:'Arrivals'},
+  {id:'d2',n:2,date:'Mon Sep 7', title:'Beach & Castle'},
+  {id:'d3',n:3,date:'Tue Sep 8', title:'Family Dinner Night'},
+  {id:'d4',n:4,date:'Wed Sep 9', title:'On the water'},
+  {id:'d5',n:5,date:'Thu Sep 10',title:'Island-hop'},
+  {id:'d6',n:6,date:'Fri Sep 11',title:'Choose your own'},
+  {id:'d7',n:7,date:'Sat Sep 12',title:'The long goodbye'},
+  {id:'d8',n:8,date:'Sun Sep 13',title:'Departures'}
+];
+const SLOTS=[{id:'am',l:'Morning'},{id:'pm',l:'Afternoon'},{id:'eve',l:'Evening'}];
+const KINDS={
+  travel:{l:'Travel',c:'#45566a'}, beach:{l:'Beach',c:'#2fa1bb'}, food:{l:'Food',c:'#c05f37'}, drinks:{l:'Drinks',c:'#d29e54'},
+  activity:{l:'Activity',c:'#2e8f78'}, sight:{l:'Sights',c:'#0b39f0'}, class:{l:'Class',c:'#7c5cbf'}, free:{l:'Free time',c:'#9aa5b1'}
+};
+// I(id, day, slot, kind, size, title, note, pinned)
+const I=(id,day,slot,kind,size,t,n,pin)=>({id,day,slot,kind,size,t,n:n||'',pin:pin?day:null});
+const DEFAULT_ITEMS=[
+  // Day 1 — Arrivals
+  I('a1','d1','pm','travel','lg','Arrivals & land on Leros','Flights and ferries in, transfers to Alinda.',true),
+  I('a2','d1','pm','travel','sm','Settle into Alinda','Check in at Hotel Alinda / Pleiades.',true),
+  I('a3','d1','eve','drinks','sm','Gather at Villa Betty','First drinks on the terrace.'),
+  I('a4','d1','eve','food','lg','Welcome dinner in Pandeli','',true),
+  I('a5','d1','eve','drinks','sm','Nightcap at Savana bar',''),
+  // Day 2 — Beach & Castle
+  I('b1','d2','am','beach','sm','Slow morning at Alinda beach',''),
+  I('b2','d2','pm','beach','lg','Lounge at Panagies beach club',''),
+  I('b3','d2','eve','sight','sm','Castle of the Virgin Mary at sunset','The island\'s crown — golden hour over Alinda Bay.'),
+  I('b4','d2','eve','drinks','sm','Cocktails at The Windmill Bar',''),
+  // Day 3 — Family Dinner Night
+  I('c1','d3','am','activity','lg','Explore the island — foot, car & scooter','Full-day block. Mint-green Vespas for confident riders.'),
+  I('c3','d3','eve','food','lg','Family Dinner at Villa Betty','Long, candle-lit, one table.'),
+  // Day 4 — On the water
+  I('e1','d4','am','activity','lg','Private boat day','Coves you can\'t reach by road — swim stops and cliff jumps.'),
+  I('e2','d4','pm','beach','sm','Krifos secret beach','Serene, reached from the boat.'),
+  I('e3','d4','eve','food','lg','Dinner at Mylos By The Sea','Michelin-starred. Swordfish bacon, smoked tuna loin.'),
+  // Day 5 — Island-hop
+  I('f1','d5','am','travel','lg','Day trip to Patmos','Across the water for the day.'),
+  I('f2','d5','pm','sight','sm','Monastery of Saint John the Apostle','Hilltop, in Patmos.'),
+  I('f3','d5','pm','sight','sm','Cave of the Apocalypse','In Patmos.'),
+  I('f4','d5','pm','food','sm','Long harbor lunch in Patmos',''),
+  // Day 6 — Choose your own
+  I('g1','d6','am','activity','lg','Watersports at Vromolithos','Windsurf, waterski, paddleboards, jet skis.'),
+  I('g2','d6','pm','class','sm','Greek cooking class','Learn the dishes you\'ll be eating all week.'),
+  I('g3','d6','pm','class','sm','Greek dancing class','No skill required.'),
+  I('g4','d6','pm','sight','sm','WWII bunkers & war museum','Tunnels carved into the rock at Lakki.'),
+  I('g5','d6','eve','drinks','sm','Sunset at Lime Bar beach club',''),
+  I('g6','d6','eve','food','lg','Dinner at Serza',''),
+  // Day 7 — The long goodbye
+  I('h1','d7','am','activity','sm','Shopping in Agia Marina & Pandeli',''),
+  I('h2','d7','pm','drinks','lg','Island wine tasting','A relaxed afternoon tour of local pours.'),
+  I('h3','d7','pm','beach','sm','Last swims at Alinda Bay',''),
+  I('h4','d7','eve','food','lg','Farewell BBQ at Villa Betty','',true),
+  I('h5','d7','eve','activity','sm','Greek dancing next door',''),
+  // Day 8 — Departures
+  I('i1','d8','am','food','sm','Freddo cappuccinos by the water',''),
+  I('i2','d8','am','travel','lg','Check out & departures','',true),
+  I('i3','d8','pm','free','sm','Optional extension','Linger a few more days.'),
+  // Not yet slotted — from the activities menu
+  I('p1',null,null,'activity','lg','Hike to Krifos','A walk to a serene beach — with a boat to carry us home.'),
+  I('p2',null,null,'activity','sm','Windsurfing & waterskiing lessons','For first-timers and pros alike.'),
+  I('p3',null,null,'activity','sm','Paddleboards & jet skis','Out on the bay at your own pace.'),
+  I('p4',null,null,'food','sm','Morning coffee at Villa Betty',''),
+  I('p5',null,null,'free','sm','Nothing at all — a spare slow day','The best days on Leros are often the ones you spend doing very little.')
+];
+DEFAULT_ITEMS.forEach((it,i)=>it.o=i);
+const clone=x=>JSON.parse(JSON.stringify(x));
+
+/* ---------------- state ---------------- */
+const LS='leros-planner-v1', LS_ROOM='leros-planner-room', LS_WHO='leros-planner-who';
+let S={items:clone(DEFAULT_ITEMS),versions:[],updatedAt:0,by:''};
+let who=localStorage.getItem(LS_WHO)||'';
+let undo=[]; let dragging=false; let editingId=null;
+const $=id=>document.getElementById(id);
+const dayById=id=>DAYS.find(d=>d.id===id);
+const itemById=id=>S.items.find(i=>i.id===id);
+
+try{const l=JSON.parse(localStorage.getItem(LS)||'null'); if(l&&l.items) S=Object.assign(S,l);}catch(e){}
+
+/* ---------------- remote sync (no-signup JSON stores) ---------------- */
+const providers={
+  jb:{
+    async create(data){const r=await fetch('https://jsonblob.com/api/jsonBlob',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(data)});
+      if(!r.ok) throw new Error('jb create '+r.status); const loc=r.headers.get('Location')||r.headers.get('location'); if(!loc) throw new Error('jb no location'); return loc.split('/').pop();},
+    async get(id){const r=await fetch('https://jsonblob.com/api/jsonBlob/'+id,{headers:{'Accept':'application/json'},cache:'no-store'}); if(!r.ok) throw new Error('jb get '+r.status); return r.json();},
+    async put(id,data){const r=await fetch('https://jsonblob.com/api/jsonBlob/'+id,{method:'PUT',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(data)}); if(!r.ok) throw new Error('jb put '+r.status);}
+  },
+  kv:{
+    async create(data){const r=await fetch('https://kvdb.io/',{method:'POST',body:'email=planner@meetmeinleros.com',headers:{'Content-Type':'application/x-www-form-urlencoded'}}); if(!r.ok) throw new Error('kv create '+r.status);
+      const id=(await r.text()).trim(); await this.put(id,data); return id;},
+    async get(id){const r=await fetch('https://kvdb.io/'+id+'/planner',{cache:'no-store'}); if(!r.ok) throw new Error('kv get '+r.status); return r.json();},
+    async put(id,data){const r=await fetch('https://kvdb.io/'+id+'/planner',{method:'PUT',body:JSON.stringify(data)}); if(!r.ok) throw new Error('kv put '+r.status);}
+  }
+};
+let room=null; // {p:'jb', id:'...'}
+let remoteOk=false, saveTimer=null, pendingSave=false, saving=false;
+
+function parseRoom(){const m=(location.hash||'').match(/r=([a-z]{2})\.([A-Za-z0-9_-]+)/); return m?{p:m[1],id:m[2]}:null;}
+function setRoom(r){room=r; const h='#r='+r.p+'.'+r.id; if(location.hash!==h) history.replaceState(null,'',h); localStorage.setItem(LS_ROOM,h);}
+function payload(){return {items:S.items,versions:S.versions,updatedAt:S.updatedAt,by:S.by,v:1};}
+function applyRemote(d){ if(!d||!d.items) return; if((d.updatedAt||0)<=(S.updatedAt||0)) return; if(dragging||pendingSave||saving) return;
+  S.items=d.items; S.versions=d.versions||[]; S.updatedAt=d.updatedAt; S.by=d.by||''; persistLocal(); renderCards(); status();}
+
+async function initRemote(){
+  let r=parseRoom();
+  if(!r){const saved=localStorage.getItem(LS_ROOM); if(saved){const m=saved.match(/r=([a-z]{2})\.([A-Za-z0-9_-]+)/); if(m) r={p:m[1],id:m[2]};}}
+  if(r){ setRoom(r); try{const d=await providers[r.p].get(r.id); remoteOk=true; if((d.updatedAt||0)>(S.updatedAt||0)){S.items=d.items;S.versions=d.versions||[];S.updatedAt=d.updatedAt;S.by=d.by||'';persistLocal();renderCards();}
+      else if((S.updatedAt||0)>(d.updatedAt||0)) queueSave(); }
+    catch(e){console.warn(e); remoteOk=false;} status(); return; }
+  // brand new board: create a room
+  if(!S.updatedAt){S.updatedAt=Date.now();S.by=who;}
+  for(const p of ['jb','kv']){ try{const id=await providers[p].create(payload()); setRoom({p,id}); remoteOk=true; $('banner').classList.add('show'); break;}catch(e){console.warn(e);} }
+  status();
+}
+function queueSave(){ pendingSave=true; status(); clearTimeout(saveTimer); saveTimer=setTimeout(flushSave,600); }
+async function flushSave(){ if(!room) {pendingSave=false; status(); return;} saving=true; const data=payload(); pendingSave=false;
+  try{ await providers[room.p].put(room.id,data); remoteOk=true; }catch(e){ console.warn(e); remoteOk=false; } saving=false; status(); }
+async function poll(){ if(!room||document.hidden||dragging||pendingSave||saving) return; try{const d=await providers[room.p].get(room.id); remoteOk=true; applyRemote(d);}catch(e){remoteOk=false;} status(); }
+setInterval(poll,5000); document.addEventListener('visibilitychange',()=>{if(!document.hidden) poll();}); window.addEventListener('focus',poll);
+
+/* ---------------- persistence ---------------- */
+function persistLocal(){ try{localStorage.setItem(LS,JSON.stringify(payload()));}catch(e){} }
+function pushUndo(){ undo.push(JSON.stringify(S.items)); if(undo.length>40) undo.shift(); $('undoBtn').disabled=false; }
+function commit(){ S.updatedAt=Date.now(); S.by=who; persistLocal(); queueSave(); updateCounts(); }
+
+/* ---------------- status ---------------- */
+function ago(t){ if(!t) return ''; const s=Math.round((Date.now()-t)/1000); if(s<60) return 'just now'; if(s<3600) return Math.floor(s/60)+'m ago'; if(s<86400) return Math.floor(s/3600)+'h ago'; return new Date(t).toLocaleDateString(); }
+function status(){ const el=$('status'), tx=$('statusTxt'); el.className='status';
+  if(pendingSave||saving){el.classList.add('busy'); tx.textContent='Saving…'; return;}
+  if(room&&remoteOk){el.classList.add('ok'); tx.textContent='Shared · '+(S.by?('last change by '+S.by+' '+ago(S.updatedAt)):'synced'); return;}
+  if(room&&!remoteOk){el.classList.add('off'); tx.textContent='Sync offline — saving on this device only'; return;}
+  el.classList.add('off'); tx.textContent='Not shared — saving on this device only';
+}
+setInterval(status,30000);
+
+/* ---------------- board ---------------- */
+const zones={}; // key -> element
+const zkey=(day,slot)=>(day||'pool')+'|'+(slot||'');
+function buildBoard(){
+  const board=$('board'), tabs=$('tabs'); board.innerHTML=''; tabs.innerHTML='';
+  // pool column
+  const pool=document.createElement('section'); pool.className='col pool'; pool.dataset.day='pool';
+  pool.innerHTML='<div class="col-h"><div class="eyebrow">Not yet slotted</div><h2>Ideas & spares</h2><div class="cnt" data-cnt="pool"></div></div><div class="slots"><div class="slot"><div class="zone" data-day="pool" data-slot=""></div></div></div>';
+  board.appendChild(pool); zones[zkey(null,null)]=pool.querySelector('.zone');
+  const t0=document.createElement('button'); t0.className='tab'; t0.textContent='Ideas'; t0.dataset.col='pool'; tabs.appendChild(t0);
+  DAYS.forEach(d=>{
+    const col=document.createElement('section'); col.className='col'; col.dataset.day=d.id;
+    let h='<div class="col-h"><div class="eyebrow">Day '+d.n+' · '+d.date+'</div><h2>'+d.title+'</h2><div class="cnt" data-cnt="'+d.id+'"></div></div><div class="slots">';
+    SLOTS.forEach(s=>{h+='<div class="slot"><div class="slot-h">'+s.l+'</div><div class="zone" data-day="'+d.id+'" data-slot="'+s.id+'"></div></div>';});
+    col.innerHTML=h+'</div>'; board.appendChild(col);
+    col.querySelectorAll('.zone').forEach(z=>zones[zkey(d.id,z.dataset.slot)]=z);
+    const tb=document.createElement('button'); tb.className='tab'; tb.innerHTML='Day '+d.n+'<span class="d">'+d.date.split(' ')[0]+'</span>'; tb.dataset.col=d.id; tabs.appendChild(tb);
+  });
+  tabs.addEventListener('click',e=>{const b=e.target.closest('.tab'); if(!b) return; const col=board.querySelector('.col[data-day="'+b.dataset.col+'"]'); col&&col.scrollIntoView({behavior:'smooth',inline:'start',block:'nearest'});});
+  board.addEventListener('scroll',()=>{clearTimeout(board._t); board._t=setTimeout(activeTab,80);},{passive:true});
+  Object.values(zones).forEach(z=>new Sortable(z,{
+    group:'items',animation:150,delay:180,delayOnTouchOnly:true,touchStartThreshold:5,forceFallback:true,fallbackOnBody:true,fallbackTolerance:4,
+    scroll:true,bubbleScroll:true,scrollSensitivity:70,scrollSpeed:14,ghostClass:'sortable-ghost',dragClass:'sortable-drag',
+    onStart(evt){dragging=true; pushUndo(); const it=itemById(evt.item.dataset.id); if(it&&it.pin){document.body.dataset.pin=it.pin; const c=board.querySelector('.col[data-day="'+it.pin+'"]'); c&&c.classList.add('pin-ok');}
+      if(navigator.vibrate) try{navigator.vibrate(8);}catch(e){}},
+    onMove(evt){ const it=itemById(evt.dragged.dataset.id); const d=evt.to.dataset.day; document.querySelectorAll('.zone.over').forEach(z=>z.classList.remove('over')); evt.to.classList.add('over');
+      if(it&&it.pin&&d!=='pool'&&d!==it.pin) return false; },
+    onEnd(){ dragging=false; delete document.body.dataset.pin; board.querySelectorAll('.pin-ok').forEach(c=>c.classList.remove('pin-ok')); document.querySelectorAll('.zone.over').forEach(z=>z.classList.remove('over'));
+      syncFromDOM(); setTimeout(()=>{dragging=false;},50); }
+  }));
+  board.addEventListener('click',e=>{ const c=e.target.closest('.card'); if(!c||dragging) return; openEdit(c.dataset.id); });
+}
+function activeTab(){ const board=$('board'); const cols=[...board.querySelectorAll('.col')]; const x=board.scrollLeft+board.clientWidth*0.3; let best=cols[0];
+  cols.forEach(c=>{ if(c.offsetLeft-board.offsetLeft<=x) best=c; }); document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.col===best.dataset.day)); }
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function cardEl(it){ const k=KINDS[it.kind]||KINDS.free; const el=document.createElement('article'); el.className='card '+(it.size==='lg'?'lg':'sm'); el.dataset.id=it.id; el.style.setProperty('--k',k.c);
+  el.innerHTML='<div class="t">'+esc(it.t)+'</div>'+(it.n?'<div class="n">'+esc(it.n)+'</div>':'')+'<div class="m"><span>'+k.l+(it.size==='lg'?' · big':'')+'</span>'+(it.pin?'<span class="pin">📍 Day '+dayById(it.pin).n+' only</span>':'')+'</div>';
+  return el; }
+function renderCards(){ Object.values(zones).forEach(z=>{ while(z.firstChild) z.removeChild(z.firstChild); });
+  S.items.slice().sort((a,b)=>(a.o||0)-(b.o||0)).forEach(it=>{ let z=zones[zkey(it.day,it.slot)]; if(!z){ it.day=null; it.slot=null; z=zones[zkey(null,null)]; } z.appendChild(cardEl(it)); });
+  updateCounts(); activeTab(); }
+function updateCounts(){ const c={pool:0}; DAYS.forEach(d=>c[d.id]=0); S.items.forEach(it=>{c[it.day||'pool']++;});
+  document.querySelectorAll('[data-cnt]').forEach(el=>{const n=c[el.dataset.cnt]||0; el.textContent=n?(n+' item'+(n===1?'':'s')):'—';}); }
+function syncFromDOM(){ Object.values(zones).forEach(z=>{ const day=z.dataset.day==='pool'?null:z.dataset.day, slot=z.dataset.slot||null;
+  [...z.children].forEach((c,i)=>{ const it=itemById(c.dataset.id); if(it){ it.day=day; it.slot=slot; it.o=i; } }); }); commit(); }
+
+/* ---------------- edit sheet ---------------- */
+let eSize='sm', eKindV='activity';
+function openEdit(id){ const it=itemById(id); if(!it) return; editingId=id;
+  $('editTitle').textContent=it._new?'New item':'Edit item'; $('eTitle').value=it.t; $('eNote').value=it.n||''; eSize=it.size; eKindV=it.kind; paintSeg();
+  const dsel=$('eDay'); dsel.innerHTML='<option value="">Not yet slotted</option>'+DAYS.map(d=>'<option value="'+d.id+'">Day '+d.n+' · '+d.date+'</option>').join(''); dsel.value=it.day||'';
+  const ssel=$('eSlot'); ssel.innerHTML=SLOTS.map(s=>'<option value="'+s.id+'">'+s.l+'</option>').join(''); ssel.value=it.slot||'am'; ssel.disabled=!it.day;
+  $('ePin').checked=!!it.pin; pinHint(); $('editOv').classList.add('open'); if(it._new) setTimeout(()=>$('eTitle').focus(),50); }
+function pinHint(){ const d=$('eDay').value; const p=$('ePin'); if(!d){p.checked=false;p.disabled=true;$('ePinHint').textContent='Put it on a day first, then you can fix it there.';}
+  else{p.disabled=false;$('ePinHint').textContent='Can only happen on Day '+dayById(d).n+' — dragging is limited to that day\'s time slots.';} }
+function paintSeg(){ $('eSize').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===eSize));
+  const kw=$('eKind'); kw.innerHTML=Object.entries(KINDS).map(([k,v])=>'<button data-v="'+k+'" class="'+(k===eKindV?'on':'')+'" style="--k:'+v.c+'">'+v.l+'</button>').join(''); }
+$('eSize').addEventListener('click',e=>{const b=e.target.closest('button'); if(b){eSize=b.dataset.v; paintSeg();}});
+$('eKind').addEventListener('click',e=>{const b=e.target.closest('button'); if(b){eKindV=b.dataset.v; paintSeg();}});
+$('eDay').addEventListener('change',()=>{ $('eSlot').disabled=!$('eDay').value; pinHint(); });
+function closeEdit(){ $('editOv').classList.remove('open'); const it=itemById(editingId); if(it&&it._new){ S.items=S.items.filter(x=>x.id!==editingId); renderCards(); } editingId=null; }
+$('eCancel').onclick=closeEdit;
+$('editOv').addEventListener('click',e=>{ if(e.target===$('editOv')) closeEdit(); });
+$('eSave').onclick=()=>{ const it=itemById(editingId); if(!it) return; const t=$('eTitle').value.trim(); if(!t){$('eTitle').focus(); return;}
+  pushUndo(); delete it._new; it.t=t; it.n=$('eNote').value.trim(); it.size=eSize; it.kind=eKindV; const d=$('eDay').value||null; it.day=d; it.slot=d?$('eSlot').value:null; it.pin=(d&&$('ePin').checked)?d:null;
+  if(it.o==null) it.o=S.items.length; else it.o=it.o+0.5; // moved items go to end of their new zone-ish
+  normalizeOrder(); $('editOv').classList.remove('open'); editingId=null; renderCards(); commit(); };
+$('eDelete').onclick=()=>{ const it=itemById(editingId); if(!it) return; if(!it._new&&!confirm('Delete "'+it.t+'"?')) return; pushUndo(); S.items=S.items.filter(x=>x.id!==editingId); $('editOv').classList.remove('open'); editingId=null; renderCards(); commit(); };
+function normalizeOrder(){ const g={}; S.items.slice().sort((a,b)=>(a.o||0)-(b.o||0)).forEach(it=>{const k=zkey(it.day,it.slot); g[k]=(g[k]||0); it.o=g[k]++;}); }
+$('addBtn').onclick=()=>{ const it={id:'x'+Date.now().toString(36),day:null,slot:null,kind:'activity',size:'sm',t:'',n:'',pin:null,o:S.items.length,_new:true}; S.items.push(it); openEdit(it.id); };
+
+/* ---------------- undo ---------------- */
+$('undoBtn').onclick=()=>{ const s=undo.pop(); if(!s) return; S.items=JSON.parse(s); $('undoBtn').disabled=!undo.length; renderCards(); commit(); toast('Undone'); };
+
+/* ---------------- versions ---------------- */
+function renderVersions(){ const l=$('vlist'); if(!S.versions.length){l.innerHTML='<p class="hint">No saved versions yet.</p>'; return;}
+  l.innerHTML=S.versions.map((v,i)=>'<div class="v"><div class="vn"><b>'+esc(v.name)+'</b><small>'+esc(v.by||'')+(v.by?' · ':'')+ago(v.at)+'</small></div><button class="btn" data-load="'+i+'">Load</button><button class="btn ghost danger" data-del="'+i+'">✕</button></div>').join(''); }
+$('versionsBtn').onclick=()=>{ renderVersions(); $('verOv').classList.add('open'); };
+$('vClose').onclick=()=>$('verOv').classList.remove('open');
+$('verOv').addEventListener('click',e=>{ if(e.target===$('verOv')) $('verOv').classList.remove('open'); });
+$('vSave').onclick=()=>{ const n=$('vName').value.trim()||('Version '+(S.versions.length+1)); S.versions.push({name:n,at:Date.now(),by:who,items:clone(S.items)}); $('vName').value=''; renderVersions(); commit(); toast('Saved "'+n+'"'); };
+$('vlist').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return;
+  if(b.dataset.load!=null){ const v=S.versions[+b.dataset.load]; pushUndo(); S.items=clone(v.items); renderCards(); commit(); $('verOv').classList.remove('open'); toast('Loaded "'+v.name+'"'); }
+  if(b.dataset.del!=null){ const v=S.versions[+b.dataset.del]; if(confirm('Delete version "'+v.name+'"?')){ S.versions.splice(+b.dataset.del,1); renderVersions(); commit(); } } });
+$('vReset').onclick=()=>{ if(!confirm('Reset the board to the original website itinerary? Saved versions are kept.')) return; pushUndo(); S.items=clone(DEFAULT_ITEMS); renderCards(); commit(); $('verOv').classList.remove('open'); toast('Reset to original'); };
+
+/* ---------------- share / who / misc ---------------- */
+async function share(){ const url=location.href; try{ if(navigator.share&&/Mobi|Android/i.test(navigator.userAgent)){ await navigator.share({title:'Leros trip planner',url}); return; } }catch(e){}
+  try{ await navigator.clipboard.writeText(url); toast('Link copied — send it to Francesca'); }catch(e){ prompt('Copy this link:',url); } }
+$('shareBtn').onclick=share; $('bannerCopy').onclick=()=>{share(); $('banner').classList.remove('show');}; $('bannerClose').onclick=()=>$('banner').classList.remove('show');
+function setWho(n){ who=n; localStorage.setItem(LS_WHO,n); $('whoName').textContent=n; $('whoOv').classList.remove('open'); }
+$('whoOv').querySelectorAll('[data-who]').forEach(b=>b.onclick=()=>setWho(b.dataset.who));
+$('whoOtherBtn').onclick=()=>{ const n=$('whoOther').value.trim(); if(n) setWho(n); };
+$('whoWrap').onclick=()=>$('whoOv').classList.add('open');
+$('status').onclick=()=>toast($('statusTxt').textContent);
+let toastT; function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2200); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeEdit(); $('verOv').classList.remove('open'); } if((e.metaKey||e.ctrlKey)&&e.key==='z'&&!$('editOv').classList.contains('open')){ e.preventDefault(); $('undoBtn').click(); } });
+
+/* ---------------- boot ---------------- */
+function boot(){ if(!window.Sortable) return; buildBoard(); renderCards(); status(); if(who) $('whoName').textContent=who; else $('whoOv').classList.add('open'); initRemote(); }
+window.__boot=boot; if(window.Sortable) boot();
+})();
+</script>
+</body>
+</html>
